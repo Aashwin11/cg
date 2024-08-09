@@ -1,0 +1,767 @@
+prog-12-faces
+img = cv.imread('faces.png')
+img_gray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
+faces_cascade = cv.CascadeClassifier(cv.data.haarcascades+'haarcascade_frontalface_default.xml')
+faces = faces_cascade.detectMultiScale(img_gray,1.3,2)
+for x,y,w,h in faces:
+    cv.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
+img_rgb = img[:,:,::-1]
+plt.imshow(img_rgb)
+
+OR
+import cv2
+import matplotlib.pyplot as plt
+
+# Load the image
+image_path = 'cricket.jpg'
+image = cv2.imread(image_path)
+
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+
+gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
+# Detect faces in the image
+faces = face_cascade.detectMultiScale(gray_image, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+
+# Initialize a list to store cropped faces
+cropped_faces = []
+
+# Draw rectangles around the detected faces and crop them
+for (x, y, w, h) in faces:
+    cv2.rectangle(image, (x, y), (x+w, y+h), (255, 0, 0), 2)
+    cropped_faces.append(image[y:y+h, x:x+w])
+
+# Display each cropped face separately
+plt.figure(figsize=(12, 6))
+for i, face in enumerate(cropped_faces):
+    plt.subplot(1, len(cropped_faces), i + 1)
+    plt.imshow(cv2.cvtColor(face, cv2.COLOR_BGR2RGB))
+    plt.axis('off')
+    plt.title(f'Face {i + 1}')
+plt.tight_layout()
+plt.show()
+
+
+
+prog-11 - contours
+#contours
+import cv2
+import matplotlib.pyplot as plt
+img = cv2.imread('itc.png')
+img_gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+img_canny = cv2.Canny(img_gray,threshold1=100,threshold2=200)
+contours,hierarchy = cv2.findContours(img_canny,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+cv2.drawContours(img,contours,-1,(0,255,0),3)
+plt.imshow(img)
+
+your program
+#contours
+img = cv.imread('chessboard.png')
+img_gray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
+img_canny = cv.Canny(img_gray,threshold1=100,threshold2=200)
+contours,hierarchy = cv.findContours(img_canny,cv.RETR_TREE,cv.CHAIN_APPROX_SIMPLE)
+cv.drawContours(img,contours,-1,(0,255,0),3)
+plt.imshow(img)
+
+
+prog-10 - blur adn smooth
+
+img = cv.imread('messi.jpeg')
+img_rgb = img[:,:,::-1]
+avgBlur = cv.blur(img_rgb,(5,5))
+gaussianBlur = cv.GaussianBlur(img_rgb,(5,5),0)
+images = [img_rgb,avgBlur,gaussianBlur]
+titles = ['ORIGINAL','AVG BLUR','GAUSSIAN BLUR']
+for i in range(3):
+    plt.subplot(1,3,i+1);plt.title(titles[i]);plt.imshow(images[i])
+
+
+prog-9 - edges and texture
+
+#feature-corner
+import numpy as np
+img = cv.imread('chessboard.png')
+img_gray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
+img_grayf = np.float32(img_gray) #convert to float
+dest = cv.cornerHarris(img_grayf,2,5,0.02)
+dest = cv.dilate(dest,None) #dilate for making corners
+img[dest>0.01*dest.max()]=[0,0,255]
+plt.imshow(img)
+
+#edge
+img = cv.imread('messi.jpeg')
+img_gray = cv.cvtColor(img,cv.COLOR_BGR2GRAY)
+edges = cv.Canny(img,threshold1=100,threshold2=200)
+plt.imshow(edges)
+
+prog-8 - Scale Rotate Translate
+
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+image=cv2.imread("img.jpg")
+image_mat=cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
+
+ht,wd,c=image.shape
+center=(wd/2,ht/2)
+
+trans=np.float32([[1,0,50],[0,1,50]])
+scale_factor = 0.5
+
+scale=np.float32([[scale_factor,0,0],[0,scale_factor,0]])
+rotate=cv2.getRotationMatrix2D(center,30,1)
+
+img_t=cv2.warpAffine(image_mat,trans,(wd+50,ht+50))
+img_s=cv2.warpAffine(image_mat,scale,(int(wd*scale_factor),int(ht*scale_factor)))
+img_r=cv2.warpAffine(image_mat,rotate,(wd,ht))
+
+fig,axs=plt.subplots(2,2)
+images=[image_mat,img_t,img_s,img_r]
+titles=["Original","Translated","Scaled","Rotated"]
+k=0
+for i in range(2):
+  for j in range(2):
+    axs[i,j].imshow(images[k])
+    axs[i,j].set_title(titles[k])
+    axs[i,j].axis("off")
+    k+=1
+
+plt.show()
+
+   
+
+
+
+prog-7 - split into  quadrants
+
+import cv2
+import matplotlib.pyplot as plt
+
+image=cv2.imread("img.jpg")
+image_mat=cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
+
+ht,wd,c=image.shape
+midx=wd//2
+midy=ht//2
+plt.imshow(image_mat)
+
+tl=image_mat[:midy,:midx]
+tr=image_mat[:midy,midx:]
+bl=image_mat[midy:,:midx]
+br=image_mat[midy:,midx:]
+
+images=[tl,tr,bl,br]
+titles=["Top Left","Top Right","Bottom left","Bottom Right"]
+fig,axs=plt.subplots(2,2)
+k=0
+
+for i in range(2):
+  for j in range(2):
+    axs[i,j].imshow(images[k])
+    axs[i,j].set_title(titles[k])
+    axs[i,j].axis("off")
+    k+=1
+
+# plt.axis("off")
+plt.show()
+
+
+
+
+prog-6-Animation wala
+
+float ambient[]={1,0,0,1};
+float light_pos[]={2,2,2,1};
+static float theta[3]={0,0,0};
+int axis       =0;
+int ch=3;
+
+void mouse(int button, int state, int x, int y)
+{
+    if(button==GLUT_LEFT_BUTTON && state==GLUT_DOWN)
+        axis = 0;
+    if(button==GLUT_MIDDLE_BUTTON && state==GLUT_DOWN)
+        axis = 1;
+    if(button==GLUT_RIGHT_BUTTON && state==GLUT_DOWN)
+        axis = 2;
+}
+
+void idle()
+{
+    theta[axis] += 0.1;
+    if(theta[axis] > 360)
+        theta[axis] -= 360;
+    glutPostRedisplay();
+}
+
+void display()
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(1,1,1,1);
+    glLoadIdentity();
+    glRotatef(theta[0],1,0,0); // rotation about x
+    glRotatef(theta[1],0,1,0); // rotate about y
+    glRotatef(theta[2],0,0,1); // rotate about z
+   
+    if(ch==1)
+        glutSolidCube(1);
+    if(ch==2)
+        glutSolidTeapot(0.5);
+    if(ch==3)
+        glutSolidCone(0.5,1.0,20,20);
+   
+    glFlush();
+    glutSwapBuffers(); // use whenever you use double buffer
+}
+
+void menu(int id)
+{
+    switch(id)
+    {
+        case 1:
+            ch=1;
+            break;
+        case 2:
+            ch=2;
+            break;
+        case 3:
+            ch=3;
+            break;
+    }
+    glutPostRedisplay();
+}
+
+int main(int argc, char ** argv)
+{
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(500,500);
+    glutCreateWindow("Color Cube");
+   
+    glutCreateMenu(menu);
+    glutAddMenuEntry("Cube", 1);
+    glutAddMenuEntry("Teapot", 2);
+    glutAddMenuEntry("Cone",3);
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
+   
+    glutDisplayFunc(display);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+    glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
+   
+    glutMouseFunc(mouse);
+    glutIdleFunc(idle);
+   
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_DEPTH_TEST);
+   
+    glutMainLoop();
+    return 0;
+}
+
+prog 5 - Table object
+
+#include<GL/glut.h>
+
+float ambient[] = {0.5, 0.5, 1, 1};
+float light_pos[] = {2, 2, 2, 1};
+
+void align(){
+glRotated(50, 0, 1, 0);
+glRotated(10, -1, 0, 0);
+glRotated(11, 0, 0, -1);
+}
+
+void obj(double tx, double ty, double tz, double sx, double sy, double sz){
+align();
+glTranslated(tx, ty, tz);
+glScaled(sx, sy, sz);
+glutSolidCube(1);
+glLoadIdentity();
+}
+
+void display(){
+glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+obj(0, 0, 0.5, 1, 1, 0.04); //right wall
+obj(-0.5, 0, 0, 0.04, 1, 1); //back wall
+obj(0, -0.5, 0, 1, 0.04, 1); //bottom wall
+
+obj(0.2, -0.2, -0.2, 0.6, 0.04, 0.6); //table top
+
+obj(-0.2, -0.4, -0.3, 0.02, 0.3, 0.02); //left leg
+obj(0.2, -0.4, 0.2, 0.02, 0.3, 0.02); //right leg
+obj(0.08, -0.4, -0.1, 0.02, 0.3, 0.02); //front leg
+obj(-0.1, -0.4, 0.1, 0.02, 0.3, 0.02); //behind leg
+
+
+
+
+align();
+glTranslated(0.3, -0.1, -0.3);
+
+glutSolidTeapot(0.09);
+glFlush();
+glLoadIdentity();
+}
+
+void main(int argc, char **argv){
+glutInit(&argc, argv);
+glutInitDisplayMode(GLUT_SINGLE|GLUT_RGB|GLUT_DEPTH);
+glutInitWindowSize(700, 700);
+glutCreateWindow("Teapot");
+glutDisplayFunc(display);
+glEnable(GL_LIGHTING);
+glEnable(GL_LIGHT0);
+glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+glLightfv(GL_LIGHT0, GL_POSITION, light_pos);
+glEnable(GL_DEPTH_TEST);
+glutMainLoop();
+}
+
+
+
+
+
+
+
+
+
+
+PROG 4- 2D Tansformation
+#include <GL/glut.h>
+#include <stdlib.h>
+
+float tri[3][3] = {{-100, 100, 0}, {-100, -100, 100}, {1, 1, 1}};
+int N = 3;
+int TRANSFORM = -1;
+#define TRANSLATE 1
+#define ROTATE 2
+#define ROTATE_PVT 3
+#define SCALE 4
+#define SCALE_FP 5
+
+float tx = 50, ty = 50;
+float theta = 30, pvX = -100, pvY = -100;
+// scaling
+float sx = 1, sy = 1.5, sz = 1; // non-uniform 2D scaling
+float fx = -100, fy = -100;
+
+void draw_tri() {
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < N; i++)
+        glVertex2f(tri[0][i], tri[1][i]);
+    glEnd();
+}
+
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT);
+    glColor3f(1, 0, 0);
+    draw_tri();
+    switch (TRANSFORM) {
+        case TRANSLATE:
+            glColor3f(1, 1, 0);
+            glPushMatrix();
+            glTranslatef(tx, ty, 0);
+            draw_tri();
+            glPopMatrix();
+            break;
+        case ROTATE:
+            glColor3f(1, 1, 0);
+            glPushMatrix();
+            glRotatef(theta, 0, 0, 1); // Rotate about Z axis
+            draw_tri();
+            glPopMatrix();
+            break;
+
+        case ROTATE_PVT:
+            glColor3f(1, 1, 0);
+            glPushMatrix();
+            glTranslatef(pvX, pvY, 0); // 3. translate back to pivot point
+            glRotatef(theta, 0, 0, 1); // 2. rotate about z axis on xy plane
+            glTranslatef(-pvX, -pvY, 0); // 1. Translate to origin
+            draw_tri();
+            glPopMatrix();
+            break;
+
+        case SCALE:
+            glColor3f(1, 0, 1);
+            glPushMatrix();
+            glScalef(sx, sy, sz);
+            draw_tri();
+            glPopMatrix();
+            break;
+
+        case SCALE_FP:
+            glColor3f(1, 0, 1);
+            glPushMatrix();
+            glTranslatef(fx, fy, 0); // 3. translate back to fp
+            glScalef(sx, sy, sz); // 2. scale about origin
+            glTranslatef(-fx, -fy, 0); // 1. translate to origin
+            draw_tri();
+            glPopMatrix();
+            break;
+    }
+    glFlush();
+}
+
+void myinit() {
+    glClearColor(1, 1, 1, 1);
+    glMatrixMode(GL_PROJECTION);
+    gluOrtho2D(-250, 250, -250, 250);
+    glMatrixMode(GL_MODELVIEW);
+}
+
+void menu(int id) {
+    switch (id) {
+        case 0:
+            exit(0);
+            break;
+        case 1:
+            TRANSFORM = TRANSLATE;
+            break;
+    }
+    glutPostRedisplay();
+}
+
+void rotMenu(int id) {
+    switch (id) {
+        case 2:
+            TRANSFORM = ROTATE;
+            break;
+        case 3:
+            TRANSFORM = ROTATE_PVT;
+            break;
+    }
+    glutPostRedisplay();
+}
+
+void scaleMenu(int id) {
+    switch (id) {
+        case 4:
+            TRANSFORM = SCALE;
+            break;
+        case 5:
+            TRANSFORM = SCALE_FP;
+            break;
+    }
+    glutPostRedisplay();
+}
+
+int main(int argc, char **argv) {
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
+    glutInitWindowSize(500, 500);
+    glutCreateWindow("2D Transformation");
+    myinit();
+
+    int rot_menu = glutCreateMenu(rotMenu); // sub menu for rotate
+    glutAddMenuEntry("Rotate about Origin", 2);
+    glutAddMenuEntry("Rotate about pivot (-100,-100)", 3);
+
+    int scale_menu = glutCreateMenu(scaleMenu); // sub menu for scale
+    glutAddMenuEntry("Scale about origin", 4);
+    glutAddMenuEntry("Scale about fixed point(-100,-100)", 5);
+
+    glutDisplayFunc(display);
+    glutCreateMenu(menu); // main menu
+    glutAddMenuEntry("Exit", 0);
+    glutAddMenuEntry("Translate", 1);
+    glutAddSubMenu("Rotate", rot_menu);
+    glutAddSubMenu("Scale", scale_menu);
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
+    glutMainLoop();
+    return 0;
+}
+
+
+PROG-3 - Geometric op 3d
+
+#include <GL/glut.h>
+#include <stdio.h>
+
+float pts[4][3] = {{0,0,1}, {0,1,-1}, {-1,-1,-1}, {1,-1,-1}};
+int k; // number of subdivisions
+
+void draw_triangle(float p1[3], float p2[3], float p3[3]) {
+    glBegin(GL_POLYGON);
+    glVertex3fv(p1); glVertex3fv(p2); glVertex3fv(p3);
+    glEnd();
+}
+
+void divide_triangle(float a[3], float b[3], float c[3], int k) {
+    if (k > 0) {
+        // find midpoints
+        float m1[3], m2[3], m3[3];
+        for (int i = 0; i < 3; i++) {
+            m1[i] = (a[i] + b[i]) / 2;
+            m2[i] = (b[i] + c[i]) / 2;
+            m3[i] = (a[i] + c[i]) / 2;
+        }
+        divide_triangle(a, m1, m3, k - 1);
+        divide_triangle(b, m1, m2, k - 1);
+        divide_triangle(c, m2, m3, k - 1);
+    } else {
+        draw_triangle(a, b, c);
+    }
+}
+
+void draw_tetrahedron() {
+    // base in black
+    glColor3f(0, 0, 0);
+    divide_triangle(pts[1], pts[2], pts[3], k);
+    // red face
+    glColor3f(1, 0, 0);
+    divide_triangle(pts[0], pts[2], pts[3], k);
+    // blue face
+    glColor3f(0, 0, 1);
+    divide_triangle(pts[0], pts[1], pts[2], k);
+    // yellow face
+    glColor3f(1, 1, 0);
+    divide_triangle(pts[0], pts[1], pts[3], k);
+}
+
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 3D - clear depth also
+    // transform
+    glPushMatrix();
+    glRotatef(45, 1, 0, 0); // rotate 45 deg about x axis(1,0,0)
+    draw_tetrahedron();
+    glPopMatrix();
+    glFlush();
+}
+
+void myinit() {
+    glClearColor(1, 1, 1, 1);
+    glMatrixMode(GL_PROJECTION);
+    glOrtho(-2, 2, -2, 2, -2, 2); // left, right, bottom, top, near far
+    glMatrixMode(GL_MODELVIEW);
+}
+
+int main(int argc, char **argv) {
+    // get input from user here
+    printf("Enter number of subdivisions: ");
+    scanf("%d", &k);
+
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE | GLUT_DEPTH); // depth buffer stores the z values for a pixel
+    glutInitWindowSize(500, 500);
+    glutCreateWindow("3D Operations - Sierpinski Gasket");
+    myinit();
+    glEnable(GL_DEPTH_TEST); // check 2 pixels having same x, y but different z, determines which pixel should be visible
+    glutDisplayFunc(display);
+    glutMainLoop();
+    return 0;
+}
+
+
+
+PROG2 -Geometric OP -2D
+
+#include <GL/glut.h>
+#include <math.h>
+
+float tri[3][3] = {{-100, 100, 0}, {-100, -100, 100}, {1, 1, 1}}; // homogenous coordinates
+int N = 3; // 3 points
+
+// Triangle
+void draw_tri(float tri[3][3]) {
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < N; i++) {
+        glVertex2f(tri[0][i], tri[1][i]); // x, y for 3 points
+    }
+    glEnd();
+}
+
+// 1. Translation function
+void translate(float tx, float ty) {
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < N; i++) {
+        glVertex2f(tri[0][i] + tx, tri[1][i] + ty); // x, y for 3 points
+    }
+    glEnd();
+}
+
+//3. Tetrahedron
+
+// 2. Rotation Function
+void rotate(float thetar, float px, float py) {
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < N; i++) {
+        float x = tri[0][i], y = tri[1][i]; // x, y for 3 points
+        glVertex2f(px + (x - px) * cos(thetar) - (y - py) * sin(thetar), py + (x - px) * sin(thetar) + (y - py) * cos(thetar)); // rotation about pivot point
+    }
+    glEnd();
+}
+
+void scale(float sx, float sy, float fx, float fy) {
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < N; i++) {
+        float x = tri[0][i], y = tri[1][i];
+        glVertex2f(x * sx + fx * (1 - sx), y * sy + fy * (1 - sy));
+    }
+    glEnd();
+}
+
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT);
+    glColor3f(1, 0, 0);
+    draw_tri(tri);
+
+    // 1. Translation
+    glColor3f(0, 1, 0); // green
+    float tx = -50, ty = -50;
+    translate(tx, ty);
+
+    // 2. Rotation
+    /* glColor3f(0, 0, 1);
+    float theta = 30;
+    float thetar = theta * (M_PI / 180);
+    float px = -100, py = -100;
+    rotate(thetar, px, py); */
+
+    // 3. Scaling
+    /* float sx = -0.5, sy = 0.5;
+    float fx = -100, fy = -100;
+    scale(sx, sy, fx, fy); */
+
+    glFlush();
+}
+
+void myinit() {
+    glClearColor(1, 1, 1, 1);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(-250, 250, -250, 250);
+    glMatrixMode(GL_MODELVIEW);
+}
+
+int main(int argc, char **argv) {
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowSize(500, 500);
+    glutCreateWindow("2D Geometric operations");
+    myinit();
+    glutDisplayFunc(display);
+    glutMainLoop();
+    return 0;
+}
+
+
+PROG 1 _bresenham
+
+#include <GL/glut.h>
+#include <stdio.h>
+#include <math.h>
+
+float ax = 100, ay = 100, bx = 200, by = 130;
+
+void draw_pixel(float x, float y) {
+    glBegin(GL_POINTS);
+    glVertex2f(x, y);
+    glEnd();
+}
+
+void bres() {
+    float dy = by - ay, dx = bx - ax;
+    float m = dy / dx;
+    printf("m: %f\n", m);
+    dx = fabs(dx);
+    dy = fabs(dy);
+    float inc = 1;
+
+    if (m < 0) {
+        inc = -1; // decrement the y
+    }
+
+    if (fabs(m) < 1) { // |m| < 1
+        float x = ax, y = ay;
+        if (bx < ax) {
+            float temp = ax;
+            ax = bx;
+            bx = temp;
+            temp = ay;
+            ay = by;
+            by = temp;
+        }
+        draw_pixel(x, y);
+        float p = 2 * dy - dx;
+        while (x < bx) {
+            if (p < 0)
+                p += 2 * dy;
+            else {
+                y += inc;
+                p += 2 * dy - 2 * dx;
+            }
+            x++;
+            draw_pixel(x, y);
+        }
+    } else { // |m| >= 1
+        if (by < ay) {
+            float temp = ax;
+            ax = bx;
+            bx = temp;
+            temp = ay;
+            ay = by;
+            by = temp;
+        }
+        float x = ax, y = ay;
+        draw_pixel(x, y);
+        float p = 2 * dx - dy;
+        while (y < by) {
+            if (p < 0)
+                p += 2 * dx;
+            else {
+                x += inc;
+                p += 2 * dx - 2 * dy;
+            }
+            y++;
+            draw_pixel(x, y);
+        }
+    }
+}
+
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT);
+    glColor3f(0, 0, 1);
+    bres();
+    glColor3f(1, 0, 0);
+    glPointSize(3.0);
+    draw_pixel(ax, ay);
+    draw_pixel(bx, by);
+    glFlush();
+}
+
+void myinit() {
+    glClearColor(1, 1, 1, 1);
+    glMatrixMode(GL_PROJECTION);
+    gluOrtho2D(0, 499, 0, 499);
+    glMatrixMode(GL_MODELVIEW);
+}
+
+int main(int argc, char **argv) {
+    printf("Enter (x1,y1) (x2,y2) :");
+    scanf("%f %f %f %f", &ax, &ay, &bx, &by);
+
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE);
+    glutInitWindowSize(500, 500);
+    glutCreateWindow("Bresenham's line drawing algorithm");
+    myinit();
+    glutDisplayFunc(display);
+    glutMainLoop();
+    return 0;
+}
+
+
+
+
+// float ax = 100, ay = 130,  bx = 200, by = 100; // m=dy/dx = -30/100 = -0.3
+// float ax = 100, ay = 50,  bx = 200, by = 350; // m=dy/dx = 300/100 = 3
+// float ax = 100, ay = 350,  bx = 200, by = 50; // m=dy/dx = -300/100 = -3
+
+
+gcc demo.c -lGL -lGLU -lglut
+./a.out
